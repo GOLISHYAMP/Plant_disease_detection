@@ -18,25 +18,34 @@ model = load_model("plant_disease.model")
 # model.eval()
 
 def prediction(image_path):
-    image = Image.open(image_path)
-    image = image.resize((224, 224))
-    input_data = TF.to_tensor(image)
-    input_data = input_data.view((-1, 3, 224, 224))
-    output = model(input_data)
-    output = output.detach().numpy()
-    index = np.argmax(output)
-    return index
-
-def xray(path, model):
-    testing = cv2.imread(path)
+    # image = Image.open(image_path)
+    # image = image.resize((224, 224))
+    # input_data = TF.to_tensor(image)
+    # input_data = input_data.view((-1, 3, 224, 224))
+    # output = model(input_data)
+    # output = output.detach().numpy()
+    # index = np.argmax(output)
+    # return index
+    testing = cv2.imread(image_path)
     resized = cv2.resize(testing, (100, 100))
 
     normalized = resized/255.0
     reshaped = np.reshape(normalized, (1, 100, 100, 3))
     result = model.predict(reshaped)
-    dic = {0: 'VIRAL PNEUMONIA', 1: 'NORMAL', 2: 'COVID'}
+    # dic = {0: 'VIRAL PNEUMONIA', 1: 'NORMAL', 2: 'COVID'}
     R = np.argmax(result)
-    return dic[R]
+    return R
+
+# def xray(path, model):
+#     testing = cv2.imread(path)
+#     resized = cv2.resize(testing, (100, 100))
+
+#     normalized = resized/255.0
+#     reshaped = np.reshape(normalized, (1, 100, 100, 3))
+#     result = model.predict(reshaped)
+#     dic = {0: 'VIRAL PNEUMONIA', 1: 'NORMAL', 2: 'COVID'}
+#     R = np.argmax(result)
+#     return dic[R]
 
 app = Flask(__name__)
 
