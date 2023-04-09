@@ -1,31 +1,41 @@
 import os
 from flask import Flask, redirect, render_template, request
 from PIL import Image
-#import torchvision.transforms.functional as TF
+import torchvision.transforms.functional as TF
 import numpy as np
 import torch
 import pandas as pd
+
 from keras.models import load_model
 import cv2
 
+BASE_PATH = os.getcwd()
+APP_PATH = os.path.join(BASE_PATH, 'Plant-Disease-Detection\Flask Deployed App')
 
-disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
-supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
+MODEL_PATH = os.path.join(APP_PATH, 'plant_disease.model')
 
-#model = CNN.CNN(39)    
-model = load_model("plant_disease.model")
+DISEASE_INFO_PATH = os.path.join(APP_PATH, 'disease_info.csv')
+SUPPLEMENT_INFO_PATH = os.path.join(APP_PATH, 'supplement_info.csv')
+
+disease_info = pd.read_csv(DISEASE_INFO_PATH , encoding='cp1252')
+supplement_info = pd.read_csv(SUPPLEMENT_INFO_PATH,encoding='cp1252')
+
+# model = CNN.CNN(39)    
+# model = torch.load(MODEL_PATH,pickle_module=pickle)
+model = load_model(MODEL_PATH)
 # model.load_state_dict(torch.load("plant_disease_model_1_latest.pt"))
 # model.eval()
 
 def prediction(image_path):
     # image = Image.open(image_path)
-    # image = image.resize((224, 224))
+    # image = image.resize((100, 100))
     # input_data = TF.to_tensor(image)
     # input_data = input_data.view((-1, 3, 224, 224))
     # output = model(input_data)
     # output = output.detach().numpy()
     # index = np.argmax(output)
     # return index
+    ####################################
     testing = cv2.imread(image_path)
     resized = cv2.resize(testing, (100, 100))
 
