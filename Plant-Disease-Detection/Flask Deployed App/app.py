@@ -1,18 +1,23 @@
 import os
 from flask import Flask, redirect, render_template, request
 from PIL import Image
-import torchvision.transforms.functional as TF
-import numpy as np
-import torch
-import pandas as pd
 
+import numpy as np
+
+import pandas as pd
+from tensorflow import keras
 from keras.models import load_model
 import cv2
+
+
+
 
 BASE_PATH = os.getcwd()
 APP_PATH = os.path.join(BASE_PATH, 'Plant-Disease-Detection\Flask Deployed App')
 
 MODEL_PATH = os.path.join(APP_PATH, 'plant_disease.model')
+
+UPLOAD_PATH = os.path.join(BASE_PATH, 'uploaded_images')
 
 DISEASE_INFO_PATH = os.path.join(APP_PATH, 'disease_info.csv')
 SUPPLEMENT_INFO_PATH = os.path.join(APP_PATH, 'supplement_info.csv')
@@ -20,42 +25,23 @@ SUPPLEMENT_INFO_PATH = os.path.join(APP_PATH, 'supplement_info.csv')
 disease_info = pd.read_csv(DISEASE_INFO_PATH , encoding='cp1252')
 supplement_info = pd.read_csv(SUPPLEMENT_INFO_PATH,encoding='cp1252')
 
-# model = CNN.CNN(39)    
-# model = torch.load(MODEL_PATH,pickle_module=pickle)
-model = load_model(MODEL_PATH)
-# model.load_state_dict(torch.load("plant_disease_model_1_latest.pt"))
-# model.eval()
+
+model = keras.models.load_model(MODEL_PATH)
+
 
 def prediction(image_path):
-    # image = Image.open(image_path)
-    # image = image.resize((100, 100))
-    # input_data = TF.to_tensor(image)
-    # input_data = input_data.view((-1, 3, 224, 224))
-    # output = model(input_data)
-    # output = output.detach().numpy()
-    # index = np.argmax(output)
-    # return index
-    ####################################
+    
     testing = cv2.imread(image_path)
     resized = cv2.resize(testing, (100, 100))
 
     normalized = resized/255.0
     reshaped = np.reshape(normalized, (1, 100, 100, 3))
     result = model.predict(reshaped)
-    # dic = {0: 'VIRAL PNEUMONIA', 1: 'NORMAL', 2: 'COVID'}
+
     R = np.argmax(result)
     return R
 
-# def xray(path, model):
-#     testing = cv2.imread(path)
-#     resized = cv2.resize(testing, (100, 100))
 
-#     normalized = resized/255.0
-#     reshaped = np.reshape(normalized, (1, 100, 100, 3))
-#     result = model.predict(reshaped)
-#     dic = {0: 'VIRAL PNEUMONIA', 1: 'NORMAL', 2: 'COVID'}
-#     R = np.argmax(result)
-#     return dic[R]
 
 app = Flask(__name__)
 
@@ -80,7 +66,8 @@ def submit():
     if request.method == 'POST':
         image = request.files['image']
         filename = image.filename
-        file_path = os.path.join('static/uploads', filename)
+        file_path = os.path.join(UPLOAD_PATH, filename)
+        print(file_path)
         image.save(file_path)
         print(file_path)
         pred = prediction(file_path)
